@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Track your order</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header><span class="logo" id="site-name">…</span><a id="back" href="#">← Back</a></header>
+<main>
+  <div class="card">
+    <h1>Track your order</h1>
+    <p class="sub">Enter the reference from your confirmation, for example ZQ-ABC12345.</p>
+    <form id="track-form">
+      <label for="ref">Order reference</label><input id="ref" required maxlength="20" autocomplete="off" style="text-transform:uppercase">
+      <button type="submit">Track</button>
+      <div class="err" id="track-err"></div>
+    </form>
+  </div>
+  <div class="card hidden" id="result"></div>
+</main>
+<script src="/track.js"></script>
+</body>
+</html>

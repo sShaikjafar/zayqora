@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Restaurant</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header><span class="logo" id="site-name">…</span></header>
+<main>
+  <div class="card" id="site-card">
+    <h1 id="s-name"></h1>
+    <p class="sub" id="s-desc"></p>
+    <div class="kv"><span>Phone</span><span id="s-phone">—</span></div>
+    <div class="kv"><span>Address</span><span id="s-address">—</span></div>
+    <p style="margin-top:16px"><a id="menu-link" href="#">View our menu →</a> &nbsp;·&nbsp; <a id="track-link" href="#">Track an order</a></p>
+    
+  </div>
+  <div class="card" id="res-card">
+    <h2>Reserve a table</h2>
+    <form id="res-form">
+      <label for="rv-name">Your name</label><input id="rv-name" required minlength="2" maxlength="100">
+      <label for="rv-phone">Phone number</label><input id="rv-phone" type="tel" required minlength="7" maxlength="20">
+      <label for="rv-email">Email (optional, for confirmation)</label><input id="rv-email" type="email" maxlength="254">
+      <div class="grid2">
+        <div><label for="rv-date">Date</label><input id="rv-date" type="date" required></div>
+        <div><label for="rv-time">Time</label><input id="rv-time" type="time" required></div>
+      </div>
+      <label for="rv-size">Number of guests</label><input id="rv-size" type="number" min="1" max="20" value="2" required>
+      <label for="rv-notes">Notes (optional)</label><input id="rv-notes" maxlength="300" placeholder="Birthday, high chair, allergies…">
+      <button type="submit">Request reservation</button>
+      <div class="err" id="rv-err"></div>
+    </form>
+    <div id="rv-done" class="hidden"></div>
+  </div>
+  <div class="card hidden" id="notfound"><h1>Restaurant not found</h1></div>
+</main>
+<script>
+(async () => {
+  const slug = location.pathname.split("/").filter(Boolean)[1];
+  const res = await fetch("/api/v1/public/restaurants/" + encodeURIComponent(slug));
+  if (!res.ok) {
+    document.getElementById("site-card").classList.add("hidden");
+    document.getElementById("notfound").classList.remove("hidden");
+    return;
+  }
+  const r = await res.json();
+  document.title = r.name;
+  document.getElementById("menu-link").href = "/r/" + encodeURIComponent(slug) + "/menu";
+  document.getElementById("track-link").href = "/r/" + encodeURIComponent(slug) + "/track";
+  document.getElementById("site-name").textContent = r.name;
+  document.getElementById("s-name").textContent = r.name;
+  document.getElementById("s-desc").textContent = r.description || "";
+  document.getElementById("s-phone").textContent = r.phone || "—";
+  document.getElementById("s-address").textContent = r.address || "—";
+  setupReservations(slug, r.timezone);
+})();
+
+function setupReservations(slug, tz) {
+  const $ = (id) => document.getElementById(id);
+  $("rv-date").min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  const newKey = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(16).slice(2);
+  let key = newKey();
+  $("res-form").onsubmit = async (e) => {
+    e.preventDefault(); $("rv-err").textContent = "";
+    const body = { customer_name: $("rv-name").value, customer_phone: $("rv-phone").value,
+      customer_email: $("rv-email").value || null, party_size: parseInt($("rv-size").value, 10),
+      date: $("rv-date").value, time: $("rv-time").value, notes: $("rv-notes").value || null };
+    const res = await fetch("/api/v1/public/restaurants/" + encodeURIComponent(slug) + "/reservations", {
+      method: "POST", headers: { "Content-Type": "application/json", "Idempotency-Key": key }, body: JSON.stringify(body) });
+    let data = null; try { data = await res.json(); } catch (_) {}
+    if (!res.ok) {
+      let msg = (data && data.detail) || "Something went wrong";
+      if (Array.isArray(msg)) msg = msg.map((x) => x.msg).join("; ");
+      $("rv-err").textContent = typeof msg === "string" ? msg : (msg.message || "Something went wrong");
+      return;
+    }
+    key = newKey();
+    const when = new Date(/Z$|[+-]\d\d:\d\d$/.test(data.starts_at) ? data.starts_at : data.starts_at + "Z");
+    let text; try { text = new Intl.DateTimeFormat(undefined, { dateStyle: "full", timeStyle: "short", timeZone: tz }).format(when); } catch (_) { text = when.toLocaleString(); }
+    $("res-form").classList.add("hidden");
+    const done = $("rv-done"); done.classList.remove("hidden"); done.replaceChildren();
+    const h = document.createElement("h2"); h.textContent = "Request received";
+    const ref = document.createElement("div"); ref.className = "ref"; ref.textContent = data.reference;
+    const p = document.createElement("p"); p.className = "sub";
+    p.textContent = `${data.customer_name}, table for ${data.party_size} on ${text}. The restaurant will confirm your booking shortly. Status: ${data.status}.`;
+    done.append(h, ref, p);
+  };
+}
+</script>
+</body>
+</html>

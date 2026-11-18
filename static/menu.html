@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header><span class="logo" id="site-name">…</span><a id="back" href="#">← Back</a></header>
+<main>
+  <h1 id="menu-title">Menu</h1>
+
+  <!-- Item customizer (variants, add-ons, quantity, note) -->
+  <div class="card panel hidden" id="customizer"></div>
+
+  <div id="menu"></div>
+
+  <!-- Cart and checkout -->
+  <div class="card hidden" id="cart-card">
+    <h2>Your order</h2>
+    <div id="cart-lines"></div>
+    <div class="seg" id="fulfil">
+      <label><input type="radio" name="fulfilment" value="pickup" checked> Pickup</label>
+      <label><input type="radio" name="fulfilment" value="delivery"> Delivery</label>
+    </div>
+    <div id="breakdown" style="margin-top:12px"></div>
+    <div class="err" id="cart-err"></div>
+
+    <form id="checkout-form">
+      <label for="c-name">Your name</label><input id="c-name" required minlength="2" maxlength="100">
+      <label for="c-phone">Phone number</label><input id="c-phone" type="tel" required minlength="7" maxlength="20">
+      <div id="addr-wrap" class="hidden">
+        <label for="c-addr">Delivery address</label><textarea id="c-addr" rows="2" maxlength="300"></textarea>
+      </div>
+      <label for="c-notes">Order notes (optional)</label><input id="c-notes" maxlength="500">
+      <p class="sub" style="margin-top:12px">Payment: cash on pickup / delivery.</p>
+      <button type="submit" id="place-btn">Place order</button>
+      <div class="err" id="order-err"></div>
+    </form>
+  </div>
+
+  <!-- Confirmation -->
+  <div class="card hidden" id="confirm-card"></div>
+
+  <div class="card hidden" id="notfound"><h1>Restaurant not found</h1></div>
+</main>
+<script src="/menu.js"></script>
+</body>
+</html>

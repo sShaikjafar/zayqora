@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZAYQORA — Restaurant Workspace</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header><span class="logo">ZAYQORA</span><button class="link" id="logout-btn" hidden>Log out</button></header>
+<main>
+  <!-- Auth -->
+  <section id="auth-view">
+    <div class="card" id="register-card">
+      <h1>Create your restaurant</h1>
+      <p class="sub">Start your branded website and ordering workspace.</p>
+      <form id="register-form">
+        <label for="r-name">Restaurant name</label><input id="r-name" required minlength="2" maxlength="120">
+        <label for="r-owner">Your name</label><input id="r-owner" required minlength="2" maxlength="120">
+        <label for="r-email">Email</label><input id="r-email" type="email" required>
+        <label for="r-pass">Password (min 8 characters)</label><input id="r-pass" type="password" required minlength="8">
+        <button type="submit">Create account</button>
+        <div class="err" id="register-err"></div>
+      </form>
+      <p class="sub">Already registered? <button class="link" id="to-login">Log in</button></p>
+    </div>
+    <div class="card hidden" id="login-card">
+      <h1>Welcome back</h1>
+      <form id="login-form">
+        <label for="l-email">Email</label><input id="l-email" type="email" required>
+        <label for="l-pass">Password</label><input id="l-pass" type="password" required>
+        <button type="submit">Log in</button>
+        <div class="err" id="login-err"></div>
+      </form>
+      <p class="sub">New here? <button class="link" id="to-register">Create a restaurant</button></p>
+    </div>
+  </section>
+
+  <!-- Dashboard shell (Day 2+ adds menu, orders, reservations) -->
+  <section id="app-view" class="hidden">
+    <div class="card">
+      <h1 id="d-name"></h1>
+      <p class="sub">Signed in as <span id="d-user"></span></p>
+      <div class="kv"><span>Public website</span><a id="d-link" href="#"></a></div>
+      <div class="kv"><span>Plan</span><span id="d-plan"></span></div>
+      <div class="kv"><span>Status</span><span id="d-status"></span></div>
+    </div>
+    <div class="card">
+      <h2>Restaurant profile</h2>
+      <form id="profile-form">
+        <label for="p-name">Name</label><input id="p-name" required minlength="2">
+        <label for="p-desc">Description</label><textarea id="p-desc" rows="3" maxlength="2000"></textarea>
+        <label for="p-phone">Phone</label><input id="p-phone" maxlength="40">
+        <label for="p-address">Address</label><input id="p-address" maxlength="255">
+        <label for="p-currency">Currency code (e.g. INR, USD)</label><input id="p-currency" maxlength="3" minlength="3" style="text-transform:uppercase">
+        <label for="p-timezone">Timezone (e.g. Asia/Kolkata)</label><input id="p-timezone" maxlength="64" placeholder="UTC">
+        <button type="submit">Save</button>
+        <div class="ok" id="profile-ok"></div><div class="err" id="profile-err"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Menu categories</h2>
+      <div id="cat-list"></div>
+      <form class="inline-form" id="cat-form">
+        <input id="c-name" placeholder="New category, e.g. Biryani" required maxlength="100">
+        <button type="submit">Add</button>
+      </form>
+      <div class="err" id="cat-err"></div>
+    </div>
+
+    <div class="card">
+      <h2>Menu items</h2>
+      <div id="item-list"></div>
+    </div>
+
+    <div class="card">
+      <h2 id="item-form-title">Add menu item</h2>
+      <form id="item-form">
+        <label for="i-cat">Category</label><select id="i-cat" required></select>
+        <label for="i-name">Name</label><input id="i-name" required maxlength="120">
+        <label for="i-desc">Description</label><textarea id="i-desc" rows="2" maxlength="2000"></textarea>
+        <label for="i-price">Base price</label><input id="i-price" type="number" min="0" step="0.01" required>
+        <div class="grid2">
+          <div><label for="i-variants">Variants (one per line, e.g. Large +2.00)</label><textarea id="i-variants" rows="3"></textarea></div>
+          <div><label for="i-addons">Add-ons (one per line, e.g. Extra cheese +1.50)</label><textarea id="i-addons" rows="3"></textarea></div>
+        </div>
+        <label class="check"><input type="checkbox" id="i-avail" checked> Available to order</label>
+        <button type="submit" id="item-save">Add item</button><button type="button" class="secondary hidden" id="item-cancel">Cancel edit</button>
+        <div class="err" id="item-err"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Ordering settings</h2>
+      <form id="settings-form">
+        <div class="grid2">
+          <div><label for="s-tax">Tax added at checkout (%)</label><input id="s-tax" type="number" min="0" max="50" step="0.01" value="0"></div>
+          <div><label for="s-fee">Delivery fee</label><input id="s-fee" type="number" min="0" step="0.01" value="0"></div>
+        </div>
+        <label for="s-min">Minimum order amount (0 = none)</label><input id="s-min" type="number" min="0" step="0.01" value="0">
+        <label class="check"><input type="checkbox" id="s-pickup" checked> Accept pickup orders</label>
+        <label class="check"><input type="checkbox" id="s-delivery" checked> Accept delivery orders</label>
+        <label for="s-capacity">Reservation capacity: guests seated at the same time (0 = no limit)</label><input id="s-capacity" type="number" min="0" max="1000" step="1" value="0">
+        <button type="submit">Save settings</button>
+        <div class="ok" id="settings-ok"></div><div class="err" id="settings-err"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Recent orders</h2>
+      <div id="order-list"></div>
+      <button type="button" class="small" id="orders-refresh" style="margin-top:12px">Refresh</button>
+      <div class="err" id="orders-err"></div>
+    </div>
+
+    <div class="card">
+      <h2>Reservations</h2>
+      <div id="res-list"></div>
+      <button type="button" class="small" id="res-refresh" style="margin-top:12px">Refresh</button>
+      <div class="err" id="res-err"></div>
+    </div>
+
+    <div class="card">
+      <h2>Email notifications</h2>
+      <p class="sub">New orders and reservations are emailed to the owner and managers. Every email is kept in this log. If no mail server is configured, they stay here as "LOGGED".</p>
+      <div id="notif-list"></div>
+      <button type="button" class="small" id="notif-refresh" style="margin-top:12px">Refresh</button>
+    </div>
+
+    <div class="card">
+      <h2>Sales reports</h2>
+      <p class="sub">Revenue counts completed orders only, by the day the order was placed, in your restaurant's timezone.</p>
+      <div class="grid2">
+        <div><label for="rep-from">From</label><input id="rep-from" type="date"></div>
+        <div><label for="rep-to">To</label><input id="rep-to" type="date"></div>
+      </div>
+      <button type="button" id="rep-run">Run report</button>
+      <button type="button" class="secondary" id="rep-csv">Download orders (CSV)</button>
+      <div class="err" id="rep-err"></div>
+      <div id="rep-out" style="margin-top:12px"></div>
+    </div>
+  </section>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>
