@@ -1,0 +1,18 @@
+# Used by Vercel. Local development keeps using requirements.txt.
+[project]
+name = "zayqora"
+version = "1.0.0"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.110",
+    "sqlalchemy>=2.0",
+    "pyjwt>=2.7",
+    "psycopg[binary]>=3.1",
+    "tzdata>=2024.1",
+]
+
+[tool.vercel]
+entrypoint = "app.main:app"
+
+[tool.uv]
+package = false

@@ -19,6 +19,9 @@ def limit(name: str, max_calls: int, per_seconds: int):
         if os.getenv("RATE_LIMIT_DISABLED") == "1":
             return
         ip = request.client.host if request.client else "unknown"
+        if os.getenv("TRUST_PROXY") == "1":  # behind Vercel / a reverse proxy: use the visitor's real address
+            forwarded = request.headers.get("x-forwarded-for", "").split(",")[0].strip()
+            ip = forwarded or ip
         now = time.monotonic()
         window = _hits[(name, ip)]
         while window and now - window[0] > per_seconds:

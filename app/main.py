@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -19,8 +20,11 @@ STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 async def lifespan(app: FastAPI):
     # Day 1: create tables directly. Switch to Alembic migrations before production.
     settings.validate_for_environment()
-    Base.metadata.create_all(engine)
-    ensure_columns(engine)  # keeps databases from earlier days working
+    try:
+        Base.metadata.create_all(engine)
+        ensure_columns(engine)  # keeps databases from earlier days working
+    except Exception:  # noqa: BLE001  (e.g. two serverless cold starts racing); requests will surface real DB problems
+        logging.getLogger("zayqora").exception("Database setup at startup failed")
     yield
 
 

@@ -18,7 +18,8 @@ log = logging.getLogger("zayqora.mailer")
 def queue_notification(db: Session, restaurant_id: int, kind: str, recipient: str, subject: str, body: str) -> int:
     row = Notification(
         restaurant_id=restaurant_id, kind=kind, recipient=recipient,
-        subject=subject[:200], body=body, status="PENDING",
+        subject=subject[:200], body=body,
+        status="PENDING" if settings.smtp_host else "LOGGED",  # LOGGED = kept in the log only
     )
     db.add(row)
     db.commit()
